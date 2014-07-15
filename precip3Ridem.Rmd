@@ -1,0 +1,18 @@
+---
+title: "R Tutorial: Precipitation Graphs, Pt 3"
+author: "Nathan Byers"
+date: "Tuesday, July 24, 2014"
+output: 
+  html_document:
+    fig_height: 6
+    fig_width: 9
+    theme: readable
+---
+
+In <a href="http://rpubs.com/NateByers/precipRidem" target="_blank">part 1</a>
+of this tutorial we tidied up some data from the `IDEMdata` package, and in
+<a href="http://rpubs.com/NateByers/precip2Ridem" target="_blank">part 2</a> we 
+used that data to create precipitation graphs. In this part we will use functions
+and loops to automate the creation of these graphs. 
+
+# Functions
