@@ -60,8 +60,47 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 <p>In <a href="http://rpubs.com/NateByers/precipRidem" target="_blank">part 1</a> of this tutorial we tidied up some data from the <code>IDEMdata</code> package, and in <a href="http://rpubs.com/NateByers/precip2Ridem" target="_blank">part 2</a> we used that data to create precipitation graphs. In this part we will use functions and loops to automate the creation of these graphs.</p>
-<div id="functions" class="section level1">
-<h1>Functions</h1>
+<div id="functions" class="section level2">
+<h2>Functions</h2>
+<p>Functions in R are created using the following general format:</p>
+<pre class="r"><code>myFunction &lt;- function(){
+  
+}</code></pre>
+<p>So functions are created just like other variables in R, with the assignment operator <code>&lt;-</code>. Arguments for the function are placed inside the brackets <code>()</code> and the statements for the function are placed inside the braces <code>{}</code>. The last line of the statements will be returned when the function is used. For example, here is a function that calculates the mean of a vector.</p>
+<pre class="r"><code>myMean &lt;- function(vector){
+  sum.of.vector &lt;- sum(vector)
+  number.of.values &lt;- length(vector)
+  average &lt;- sum.of.vector/number.of.values
+  average
+}</code></pre>
+<p>So now we can use this like any other function in R.</p>
+<pre class="r"><code>myMean(vector = rnorm(10))</code></pre>
+<pre><code>## [1] 0.04178</code></pre>
+</div>
+<div id="plot-function" class="section level2">
+<h2>Plot function</h2>
+<p>We’re going to write our own function that will take watershed data and create precipitation graphs. We’ll call our function <code>precipPlot()</code> and it’ll have the following general outline:</p>
+<pre class="r"><code>precipPlot &lt;- function(plot.type, data, ...){
+  
+  if(plot.type == &quot;base&quot;){
+    
+    # base plot statements
+    
+  } else if(plot.type == &quot;lattice&quot;){
+    
+    # lattice plot statements
+    
+  } else if(plot.type == &quot;ggplot&quot;){
+    
+    # ggplot statements
+    
+  } else {
+    
+    stop(&quot;you must provide a plot type&quot;)
+    
+  }
+  
+}</code></pre>
 </div>
 
 

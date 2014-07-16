@@ -15,4 +15,75 @@ of this tutorial we tidied up some data from the `IDEMdata` package, and in
 used that data to create precipitation graphs. In this part we will use functions
 and loops to automate the creation of these graphs. 
 
-# Functions
+## Functions
+
+Functions in R are created using the following general format:
+
+```{r, eval=FALSE}
+myFunction <- function(){
+  
+}
+```
+
+So functions are created just like other variables in R, with the assignment
+operator `<-`. Arguments for the function are placed inside the brackets `()` 
+and the statements for the function are placed inside the braces `{}`. The last line
+of the statements will be returned when the function is used. For example, here 
+is a function that calculates the mean of a vector.
+
+```{r}
+myMean <- function(vector){
+  sum.of.vector <- sum(vector)
+  number.of.values <- length(vector)
+  average <- sum.of.vector/number.of.values
+  average
+}
+```
+
+So now we can use this like any other function in R.
+
+```{r}
+myMean(vector = rnorm(10))
+```
+
+## Plot function
+
+We're going to write our own function that will take watershed data and create
+precipitation graphs. We'll call our function `precipPlot()` and it'll have
+the following general outline:
+
+```{r, eval=FALSE}
+precipPlot <- function(plot.type, date, precip, sample, ...){
+  
+  if(plot.type == "base"){
+    
+    # base plot statements
+    
+  } else if(plot.type == "lattice"){
+    
+    # lattice plot statements
+    
+  } else if(plot.type == "ggplot"){
+    
+    # ggplot statements
+    
+  } else {
+    
+    stop("you must provide a plot type")
+    
+  }
+  
+}
+  
+```
+
+The three arguments we have so far are the minimum arguments we need to create
+a graph. We'll add more as we go along. Right now the requirements for these
+arguments are that `plot.type` is given the value `"base"` or `"lattice"` or 
+`"ggplot"`; that `date` has the `"Date"` class and that `precip` and `sample` have
+the `"numeric"` class; and that the three vectors are of the same length (and are
+ordered appropriately).
+
+
+
+
