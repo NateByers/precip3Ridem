@@ -40,7 +40,7 @@ myMean <- function(vector){
 }
 ```
 
-So now we can use this like any other function in R.
+Now we can use this like any other function in R.
 
 ```{r}
 myMean(vector = rnorm(10))
@@ -49,29 +49,23 @@ myMean(vector = rnorm(10))
 ## Plot function
 
 We're going to write our own function that will take watershed data and create
-precipitation graphs. We'll call our function `precipPlot()` and it'll have
+a precipitation graph. We'll call our function `precipPlot()` and it'll have
 the following general outline:
 
 ```{r, eval=FALSE}
-precipPlot <- function(plot.type, date, precip, sample, ...){
+precipPlot <- function(date, precip, sample, trellis = FALSE, ...){
   
-  if(plot.type == "base"){
-    
-    # base plot statements
-    
-  } else if(plot.type == "lattice"){
+  if(trellis == FALSE){
     
     # lattice plot statements
     
-  } else if(plot.type == "ggplot"){
+  } else if(trellis == TRUE){
     
-    # ggplot statements
+    # lattice plot statements with conditional
     
-  } else {
-    
-    stop("you must provide a plot type")
-    
-  }
+  } 
+  
+  # double y scale plot statements
   
 }
   
@@ -79,10 +73,121 @@ precipPlot <- function(plot.type, date, precip, sample, ...){
 
 The three arguments we have so far are the minimum arguments we need to create
 a graph. We'll add more as we go along. Right now the requirements for these
-arguments are that `plot.type` is given the value `"base"` or `"lattice"` or 
-`"ggplot"`; that `date` has the `"Date"` class and that `precip` and `sample` have
-the `"numeric"` class; and that the three vectors are of the same length (and are
-ordered appropriately).
+arguments are that `date` has the `"Date"` class and that `precip` and `sample` have
+the `"numeric"` class; that the three vectors are of the same length (and are
+ordered appropriately); and that `trellis` is either `TRUE` or `FALSE`.
+
+Now we'll simply add code for the plot into braces. 
+
+```{r}
+precipPlot <- function(date, precip, sample, trellis, sample.label, ...){
+  
+  if(trellis == FALSE){
+    
+    rain <- xyplot(precip ~ date, type = "h", ylab = "Precipitation (in)",
+                   xlab = "Date")
+
+    sample <- xyplot(sample  ~ date, type = "p", ylab = sample.label, 
+                     ylim = c(0, 2*max(sample, na.rm = TRUE)))
+    
+  } else if(trellis == TRUE){
+    
+    time <- as.POSIXlt(date)
+    
+    month.year <- format(time, "%b, %Y")
+    
+    month.year <- factor(month.year, levels = unique(month.year))
+    
+    rows <- length(levels(month.year))/3
+    
+    mday <- time$mday
+    
+    rain <- xyplot(precip ~ mday | month.year, type = "h",
+                   ylab = "Precipitation (in)", layout = c(3, rows), as.table = TRUE, 
+                   xlab = "")
+    
+    sample <- xyplot(sample  ~ mday | month.year, type = "p", ylab = sample.label,
+                  ylim = c(0, 2*max(sample, na.rm = TRUE)))
+    
+  } 
+  
+  doubley <- doubleYScale(rain, sample, add.ylab2 = TRUE, under = TRUE, 
+                          text = c( "Precipitation (in)", sample.label),
+                          column = 2, type = c("l", "p"))
+  
+  update(doubley,
+         par.settings = simpleTheme(col = c("black", "red"), pch = c(NA, 16)))
+  
+}
+  
+```
+
+Before we can use this function, we need data in the proper format. So we'll write
+a function that subsets the `wide.precip.df` data frame, properly formats the 
+data, and calls the `precipPlot` function.
+
+```{r}
+precipSubsetPlot <- function(data, site, site.col, date.col, precip.col, 
+                             sample.col, sample.name, conditioned, save = TRUE,
+                             file.extension = "png", ...){
+  
+  site.df <- data[data[, site.col] == site, c(date.col, sample.col)]
+  
+  precip.df <- unique(data[, c(date.col, precip.col)])
+  
+  site.df <- merge(precip.df, site.df, all = TRUE)
+  
+  remove(data, precip.df)
+  
+  plot <- precipPlot(date = site.df[, date.col], precip = site.df[, precip.col],
+                     sample = site.df[, sample.col], trellis = conditioned,
+                     sample.label = sample.name)
+  
+  if(save){
+    
+    file.name <- paste(site, sample.col, "precip_graph", sep = "_")
+    
+    
+    file.name <- paste(file.name, file.extension, sep = ".")
+    
+    trellis.device(device = file.extension, filename = file.name)
+    
+    print(plot)
+    
+    dev.off()
+    
+  } else {
+    
+    plot
+    
+    }
+  
+}
+
+```
+
+This function takes a data frame (the argument `data`) that is in the wide format,
+subsets it down to a particular sampling site, creates a precipitation graph
+of the specified sampled data, and saves it. Let's see if it works. The following
+code should save a `.png` file in your working directory.
+
+```{r, eval=FALSE}
+library(lattice)
+library(latticeExtra)
+library(IDEMdata)
+
+data(wide_precip)
+
+precipSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station", 
+                 date.col = "date", precip.col = "precipitation",  sample.col = "sat", 
+                 sample.name = "% Saturation", conditioned = "TRUE", save = TRUE, 
+                 file.extension = "png")
+
+```
+
+
+
+
 
 
 
