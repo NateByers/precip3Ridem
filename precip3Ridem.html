@@ -75,7 +75,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 }</code></pre>
 <p>Now we can use this like any other function in R.</p>
 <pre class="r"><code>myMean(vector = rnorm(10))</code></pre>
-<pre><code>## [1] 0.1975</code></pre>
+<pre><code>## [1] 0.02957</code></pre>
 </div>
 <div id="plot-function" class="section level2">
 <h2>Plot function</h2>
@@ -139,7 +139,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>Before we can use this function, we need data in the proper format. So we’ll write a function that subsets the <code>wide.precip.df</code> data frame, properly formats the data, and calls the <code>precipPlot</code> function.</p>
 <pre class="r"><code>precipSubsetPlot &lt;- function(data, site, site.col, date.col, precip.col, 
                              sample.col, sample.name, conditioned, save = TRUE,
-                             file.extension = &quot;png&quot;, ...){
+                             file.prefix = NULL, file.extension = &quot;png&quot;, ...){
   
   site.df &lt;- data[data[, site.col] == site, c(date.col, sample.col)]
   
@@ -157,8 +157,9 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
     
     file.name &lt;- paste(site, sample.col, &quot;precip_graph&quot;, sep = &quot;_&quot;)
     
-    
     file.name &lt;- paste(file.name, file.extension, sep = &quot;.&quot;)
+    
+    file.name &lt;- paste0(file.prefix, file.name)
     
     trellis.device(device = file.extension, filename = file.name)
     
@@ -184,6 +185,13 @@ precipSubsetPlot(data = wide.precip.df, site = &quot;LMG-05-0009&quot;, site.col
                  date.col = &quot;date&quot;, precip.col = &quot;precipitation&quot;,  sample.col = &quot;sat&quot;, 
                  sample.name = &quot;% Saturation&quot;, conditioned = &quot;TRUE&quot;, save = TRUE, 
                  file.extension = &quot;png&quot;)</code></pre>
+</div>
+<div id="section" class="section level2">
+<h2>…</h2>
+<div id="r-markdown" class="section level3">
+<h3>R Markdown</h3>
+<p>This tutorial was created using RStudio’s <a href="http://rmarkdown.rstudio.com/" target="_blank">R Markdown</a>. The code can be found on <a href="https://github.com/NateByers/precip3Ridem" target="_blank">GitHub</a>.</p>
+</div>
 </div>
 
 

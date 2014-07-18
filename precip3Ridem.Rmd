@@ -129,7 +129,7 @@ data, and calls the `precipPlot` function.
 ```{r}
 precipSubsetPlot <- function(data, site, site.col, date.col, precip.col, 
                              sample.col, sample.name, conditioned, save = TRUE,
-                             file.extension = "png", ...){
+                             file.prefix = NULL, file.extension = "png", ...){
   
   site.df <- data[data[, site.col] == site, c(date.col, sample.col)]
   
@@ -147,8 +147,9 @@ precipSubsetPlot <- function(data, site, site.col, date.col, precip.col,
     
     file.name <- paste(site, sample.col, "precip_graph", sep = "_")
     
-    
     file.name <- paste(file.name, file.extension, sep = ".")
+    
+    file.name <- paste0(file.prefix, file.name)
     
     trellis.device(device = file.extension, filename = file.name)
     
@@ -185,6 +186,15 @@ precipSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "statio
 
 ```
 
+...
+-------------------------------------------------------------------------------
+
+
+### R Markdown
+
+This tutorial was created using RStudio's <a href="http://rmarkdown.rstudio.com/"
+target="_blank">R Markdown</a>. The code can be found on <a href="https://github.com/NateByers/precip3Ridem"
+target="_blank">GitHub</a>.
 
 
 
