@@ -186,6 +186,103 @@ precipSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "statio
 
 ```
 
+
+## Loops
+
+Like most programming languages, R has while loops and for loops. For loops are
+the most common loops used in , so we'll cover how they are written. But in R, 
+it's even more common to use a special family of loop operations called `apply()` 
+functions. We'll end up using one of those to automate our precipitation graphs,
+but first we'll go over the for loop.
+
+## For loop
+
+In most programming languages, the for loop would be set up in this way:
+
+```{r, eval=FALSE}
+i <- 1
+for(i in sequence){
+  # operation indexed by i
+}
+```
+
+So you first create an index variable, traditionally named `i`, and give it an 
+initial value of `1` (or `0`, or whatever initial value makes sense for the situation).
+The `sequence` variable would be a sequence of values that you want the index 
+variable to take while the statements in the brackets are iterated. Lets look at
+a real example using the `myMean()` function we created above.
+
+```{r}
+list.of.vectors <- list(1:20, rnorm(10), rnorm(30))
+
+i <- 1
+vector.means <- c()
+for(i in 1:3){
+  vector.means[i] <- myMean(list.of.vectors[[i]])
+  i <- i + 1
+}
+
+vector.means
+```
+
+So we created the index variable `i` with the intial value of `1`, created the
+empty vector `vector.means` to collected the mean values in, and ran the for loop
+over the sequence `1:3`. This means that in the first iteration the average of
+the first vector in the list `list.of.vectors` is placed as the first value in
+`vector.means`, i.e. we have the expression `vector.means[1] <- myMean(list.of.vectors[[1]])`.
+And the last line of the loop adds a one to the index variable, so `i` takes on 
+a value of `2` for the next iteration, and we have `vector.means[2] <- myMean(list.of.vectors[[2]])`.
+This happens a third time, when the index value is `3`, and the for loop stops
+after this iteration because `i` has taken the last value in the sequence.
+
+In R, you can actually simplify the expression a little bit, because you don't 
+have to manipulate the index variable. This will also work:
+
+```{r}
+vector.means <- c()
+for(i in 1:3){
+  vector.means[i] <- myMean(list.of.vectors[[i]])
+}
+
+vector.means
+```
+
+## apply functions
+
+Experienced R programmers typically do not use for loops, especially for the 
+example we just looked at. This is an ideal situation for the `lapply()` function.
+`lappy()` is one of a family of functions that are referred to as `apply` functions.
+Type `?apply` and `?lapply` to see descriptions of the many related functions.
+
+`lapply()` takes just two arguments (at a minimum), `lapply(X, FUN, ...)`. `X`
+is a list of objects that you want to perform an operation on, and `FUN` is the 
+function that you want to apply to each object. In our situation, we want to 
+apply `myMean()` to `list.of.vectors`.
+
+```{r}
+lapply(list.of.vectors, myMean)
+```
+
+`lapply()` always returns a list of objects. If we wanted the output to be a vector,
+we could use the `sapply()` function which simplifies what is returned.
+
+```{r}
+sapply(list.of.vectors, myMean)
+```
+
+## Automating the graphs
+
+Now, if we want to make a lot of precipitation graphs, we need to set up our code
+so that we can easily loop through all of the arguments necessary for each plot.
+For example, if we wanted to plot 3 different sampling substances at 2 sites, we
+could visualize these scenarios in a data frame.
+
+```{r}
+substance <- c("sat", "e_coli", "ph")
+station <- c("LMG-05-0009", "LM-05-0004")
+scenarios <- expand.grid(substance, station)
+scenarios
+```
 ...
 -------------------------------------------------------------------------------
 
