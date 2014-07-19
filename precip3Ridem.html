@@ -75,7 +75,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 }</code></pre>
 <p>Now we can use this like any other function in R.</p>
 <pre class="r"><code>myMean(vector = rnorm(10))</code></pre>
-<pre><code>## [1] 0.01739</code></pre>
+<pre><code>## [1] -0.05157</code></pre>
 </div>
 <div id="plot-function" class="section level2">
 <h2>Plot function</h2>
@@ -208,7 +208,7 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.500000 -0.044970  0.004891</code></pre>
+<pre><code>## [1] 10.50000 -0.89736  0.09563</code></pre>
 <p>So we created the index variable <code>i</code> with the intial value of <code>1</code>, created the empty vector <code>vector.means</code> to collected the mean values in, and ran the for loop over the sequence <code>1:3</code>. This means that in the first iteration the average of the first vector in the list <code>list.of.vectors</code> is placed as the first value in <code>vector.means</code>, i.e. we have the expression <code>vector.means[1] &lt;- myMean(list.of.vectors[[1]])</code>. And the last line of the loop adds a one to the index variable, so <code>i</code> takes on a value of <code>2</code> for the next iteration, and we have <code>vector.means[2] &lt;- myMean(list.of.vectors[[2]])</code>. This happens a third time, when the index value is <code>3</code>, and the for loop stops after this iteration because <code>i</code> has taken the last value in the sequence.</p>
 <p>In R, you can actually simplify the expression a little bit, because you don’t have to manipulate the index variable. This will also work:</p>
 <pre class="r"><code>vector.means &lt;- c()
@@ -217,7 +217,7 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.500000 -0.044970  0.004891</code></pre>
+<pre><code>## [1] 10.50000 -0.89736  0.09563</code></pre>
 </div>
 <div id="apply-functions" class="section level2">
 <h2>apply functions</h2>
@@ -228,28 +228,48 @@ vector.means</code></pre>
 ## [1] 10.5
 ## 
 ## [[2]]
-## [1] -0.04497
+## [1] -0.8974
 ## 
 ## [[3]]
-## [1] 0.004891</code></pre>
+## [1] 0.09563</code></pre>
 <p><code>lapply()</code> always returns a list of objects. If we wanted the output to be a vector, we could use the <code>sapply()</code> function which simplifies what is returned.</p>
 <pre class="r"><code>sapply(list.of.vectors, myMean)</code></pre>
-<pre><code>## [1] 10.500000 -0.044970  0.004891</code></pre>
+<pre><code>## [1] 10.50000 -0.89736  0.09563</code></pre>
 </div>
 <div id="automating-the-graphs" class="section level2">
 <h2>Automating the graphs</h2>
 <p>Now, if we want to make a lot of precipitation graphs, we need to set up our code so that we can easily loop through all of the arguments necessary for each plot. For example, if we wanted to plot 3 different sampling substances at 2 sites, we could visualize these scenarios in a data frame.</p>
 <pre class="r"><code>substance &lt;- c(&quot;sat&quot;, &quot;e_coli&quot;, &quot;ph&quot;)
 station &lt;- c(&quot;LMG-05-0009&quot;, &quot;LM-05-0004&quot;)
-scenarios &lt;- expand.grid(substance, station)
+scenarios &lt;- expand.grid(substance, station, stringsAsFactors = FALSE)
+colnames(scenarios) &lt;- c(&quot;substance&quot;, &quot;station&quot;)
 scenarios</code></pre>
-<pre><code>##     Var1        Var2
-## 1    sat LMG-05-0009
-## 2 e_coli LMG-05-0009
-## 3     ph LMG-05-0009
-## 4    sat  LM-05-0004
-## 5 e_coli  LM-05-0004
-## 6     ph  LM-05-0004</code></pre>
+<pre><code>##   substance     station
+## 1       sat LMG-05-0009
+## 2    e_coli LMG-05-0009
+## 3        ph LMG-05-0009
+## 4       sat  LM-05-0004
+## 5    e_coli  LM-05-0004
+## 6        ph  LM-05-0004</code></pre>
+<p>One way to run the <code>precipSubsetPlot()</code> function on all of these scenarios is to use a for loop that loops through the index of rows on the data frame. The only thing we’re missing is the label for the substance on the graph, so first we’ll create a vector of substance names.</p>
+<pre class="r"><code>substance.names &lt;- scenarios[, &quot;substance&quot;]
+substance.names[substance.names == &quot;sat&quot;] &lt;- &quot;% Saturation&quot;
+substance.names[substance.names == &quot;e_coli&quot;] &lt;- &quot;E. coli (MPN/100mL)&quot;
+substance.names[substance.names == &quot;ph&quot;] &lt;- &quot;pH (SU)&quot;
+
+for(i in 1:dim(scenarios)[1]){
+  precipSubsetPlot(data = wide.precip.df, site = scenarios[i, &quot;station&quot;], 
+                   site.col = &quot;station&quot;, date.col = &quot;date&quot;, 
+                   precip.col = &quot;precipitation&quot;,  sample.col = scenarios[i, &quot;substance&quot;], 
+                   sample.name = substance.names[i], conditioned = &quot;TRUE&quot;, save = TRUE, 
+                   file.extension = &quot;png&quot;)
+}</code></pre>
+<p>We could also use an <code>apply</code> function called <code>mapply()</code>.</p>
+<pre class="r"><code>mapply(FUN = precipSubsetPlot, site = scenarios[, &quot;station&quot;], 
+       sample.col = scenarios[, &quot;substance&quot;], sample.name = substance.names,
+       MoreArgs = list(data = wide.precip.df, site.col = &quot;station&quot;, date.col = &quot;date&quot;, 
+                       precip.col = &quot;precipitation&quot;, conditioned = &quot;TRUE&quot;, save = TRUE, 
+                       file.extension = &quot;png&quot;))</code></pre>
 </div>
 <div id="section" class="section level2">
 <h2>…</h2>

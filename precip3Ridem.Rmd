@@ -280,9 +280,41 @@ could visualize these scenarios in a data frame.
 ```{r}
 substance <- c("sat", "e_coli", "ph")
 station <- c("LMG-05-0009", "LM-05-0004")
-scenarios <- expand.grid(substance, station)
+scenarios <- expand.grid(substance, station, stringsAsFactors = FALSE)
+colnames(scenarios) <- c("substance", "station")
 scenarios
 ```
+
+One way to run the `precipSubsetPlot()` function on all of these scenarios is
+to use a for loop that loops through the index of rows on the data frame. The only
+thing we're missing is the label for the substance on the graph, so first we'll 
+create a vector of substance names.
+
+```{r, eval=FALSE}
+substance.names <- scenarios[, "substance"]
+substance.names[substance.names == "sat"] <- "% Saturation"
+substance.names[substance.names == "e_coli"] <- "E. coli (MPN/100mL)"
+substance.names[substance.names == "ph"] <- "pH (SU)"
+
+for(i in 1:dim(scenarios)[1]){
+  precipSubsetPlot(data = wide.precip.df, site = scenarios[i, "station"], 
+                   site.col = "station", date.col = "date", 
+                   precip.col = "precipitation",  sample.col = scenarios[i, "substance"], 
+                   sample.name = substance.names[i], conditioned = "TRUE", save = TRUE, 
+                   file.extension = "png")
+}
+```
+
+We could also use an `apply` function called `mapply()`.
+
+```{r, eval=FALSE}
+mapply(FUN = precipSubsetPlot, site = scenarios[, "station"], 
+       sample.col = scenarios[, "substance"], sample.name = substance.names,
+       MoreArgs = list(data = wide.precip.df, site.col = "station", date.col = "date", 
+                       precip.col = "precipitation", conditioned = "TRUE", save = TRUE, 
+                       file.extension = "png"))
+```
+
 ...
 -------------------------------------------------------------------------------
 
