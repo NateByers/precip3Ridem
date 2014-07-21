@@ -1,7 +1,7 @@
 ---
 title: "R Tutorial: Precipitation Graphs, Pt 3"
 author: "Nathan Byers"
-date: "Tuesday, July 24, 2014"
+date: "Thursday, July 24, 2014"
 output: 
   html_document:
     fig_height: 6
@@ -43,7 +43,7 @@ myMean <- function(vector){
 Now we can use this like any other function in R.
 
 ```{r}
-myMean(vector = rnorm(10))
+myMean(vector = c(5, 7, 3.14, 12, 9))
 ```
 
 ## Plot function
@@ -53,7 +53,7 @@ a precipitation graph. We'll call our function `prPlot()` and it'll have
 the following general outline:
 
 ```{r, eval=FALSE}
-prPlot <- function(date, precip, sample, trellis = FALSE, ...){
+prPlot <- function(date, precip, sample, trellis = FALSE){
   
   if(trellis == FALSE){
     
@@ -71,16 +71,15 @@ prPlot <- function(date, precip, sample, trellis = FALSE, ...){
   
 ```
 
-The three arguments we have so far are the minimum arguments we need to create
-a graph. We'll add more as we go along. Right now the requirements for these
-arguments are that `date` has the `"Date"` class and that `precip` and `sample` have
-the `"numeric"` class; that the three vectors are of the same length (and are
-ordered appropriately); and that `trellis` is either `TRUE` or `FALSE`.
+The requirements for the arguments are that `date` has the `"Date"` class and 
+that `precip` and `sample` have the `"numeric"` class; that the three vectors 
+are of the same length (and are ordered appropriately); and that `trellis` is 
+either `TRUE` or `FALSE`.
 
-Now we'll simply add code for the plot into braces. 
+Now we'll place code for the plot in braces. 
 
-```{r}
-prPlot <- function(date, precip, sample, trellis, sample.label, ...){
+```{r, eval=FALSE}
+prPlot <- function(date, precip, sample, trellis, sample.label){
   
   if(trellis == FALSE){
     
@@ -92,14 +91,20 @@ prPlot <- function(date, precip, sample, trellis, sample.label, ...){
     
   } else if(trellis == TRUE){
     
+    # create a time variable with the "POSIXlt"" class
     time <- as.POSIXlt(date)
     
+    # create a character vector with the format "Month, Year" 
+    # with a three-letter abbreviation for the month
     month.year <- format(time, "%b, %Y")
     
+    # make the character vector a factor with levels in the appropriate order
     month.year <- factor(month.year, levels = unique(month.year))
     
+    # determine the number of rows for the trellis grid
     rows <- length(levels(month.year))/3
     
+    # create a vector with days of the month
     mday <- time$mday
     
     rain <- xyplot(precip ~ mday | month.year, type = "h",
@@ -122,23 +127,25 @@ prPlot <- function(date, precip, sample, trellis, sample.label, ...){
   
 ```
 
-Before we can use this function, we need data in the proper format. So we'll write
-a function that subsets the `wide.precip.df` data frame, properly formats the 
-data, and calls the `prPlot` function.
+But before we can use this function, we need data in the proper format. So we'll write
+a function that subsets data that is in the same format as the `wide.precip.df` 
+data frame and calls the `prPlot` function.
 
-```{r}
+```{r, eval=FALSE}
 prSubsetPlot <- function(data, site, site.col, date.col, precip.col, 
                          sample.col, sample.name, conditioned = TRUE,
                          save = TRUE, file.prefix = NULL, 
-                         file.extension = "png", ...){
+                         file.extension = "png"){
   
+  # subset down to rows with the user selected site
   site.df <- data[data[, site.col] == site, c(date.col, sample.col)]
   
+  # create a data frame with precipitation values for every day, no duplicates
   precip.df <- unique(data[, c(date.col, precip.col)])
   
+  # create a data frame with precipitaiton and sample columns, and a date
+  # column with unique dates
   site.df <- merge(precip.df, site.df, all = TRUE)
-  
-  remove(data, precip.df)
   
   plot <- prPlot(date = site.df[, date.col], precip = site.df[, precip.col],
                      sample = site.df[, sample.col], trellis = conditioned,
@@ -146,16 +153,21 @@ prSubsetPlot <- function(data, site, site.col, date.col, precip.col,
   
   if(save){
     
+    # create a file name using site and sample names
     file.name <- paste(site, sample.col, "precip_graph", sep = "_")
     
+    # add the extension to the end of the file name
     file.name <- paste(file.name, file.extension, sep = ".")
     
+    # add the prefix to the beginning
     file.name <- paste0(file.prefix, file.name)
     
+    # open the appropriate graphing device with location for the file
     trellis.device(device = file.extension, filename = file.name)
-    
+     
     print(plot)
     
+    # turn off the graphing device
     dev.off()
     
   } else {
@@ -191,7 +203,7 @@ prSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station",
 ## Loops
 
 Like most programming languages, R has while loops and for loops. For loops are
-the most common loops used in , so we'll cover how they are written. But in R, 
+the most commonly used, so we'll cover how they are written. But in R, 
 it's even more common to use a special family of loop operations called `apply()` 
 functions. We'll end up using one of those to automate our precipitation graphs,
 but first we'll go over the for loop.
@@ -226,12 +238,12 @@ for(i in 1:3){
 vector.means
 ```
 
-So we created the index variable `i` with the intial value of `1`, created the
+So we created the index variable `i` with the initial value of `1`, created the
 empty vector `vector.means` to collected the mean values in, and ran the for loop
 over the sequence `1:3`. This means that in the first iteration the average of
 the first vector in the list `list.of.vectors` is placed as the first value in
 `vector.means`, i.e. we have the expression `vector.means[1] <- myMean(list.of.vectors[[1]])`.
-And the last line of the loop adds a one to the index variable, so `i` takes on 
+And the last line of the loop adds a `1` to the index variable, so `i` takes on 
 a value of `2` for the next iteration, and we have `vector.means[2] <- myMean(list.of.vectors[[2]])`.
 This happens a third time, when the index value is `3`, and the for loop stops
 after this iteration because `i` has taken the last value in the sequence.
@@ -306,18 +318,18 @@ for(i in 1:dim(scenarios)[1]){
 }
 ```
 
-We could also use an `apply` function called `mapply()`.
+We could also use an `apply` function called `mapply()`. 
 
 ```{r, eval=FALSE}
-mapply(FUN = prSubsetPlot, site = scenarios[, "station"], 
+mapply(FUN = prSubsetPlot, site = scenarios[, "station"],  
        sample.col = scenarios[, "substance"], sample.name = substance.names,
        MoreArgs = list(data = wide.precip.df, site.col = "station", date.col = "date", 
                        precip.col = "precipitation", conditioned = "TRUE", save = TRUE, 
                        file.extension = "png"))
 ```
 
-Finally, to put all of these funtions together and make the automation of 
-precipitaiton graphs as simple as possible, we make one function that will loop
+Finally, to put all of these functions together and make the automation of 
+precipitation graphs as simple as possible, we make one function that will loop
 through all of the plots and save them to the working directory.
 
 ```{r, eval=FALSE}
@@ -346,6 +358,9 @@ every substance and site in the `wide.precip.df` data frame.
 
 stations <- unique(wide.precip.df$station[!is.na(wide.precip.df$station)])
 samples <- colnames(wide.precip.df)[8:34]
+
+# to get the names for the substances, load the deep_river_chemistry
+# data frame and reshape it to get the names in the proper order
 data(deep_river_chemistry)
 library(reshape2)
 wide.df <- dcast(deep_river_chemistry, STATION_NAME + ACTIVITY_NO + ACTIVITY_END_DATE 

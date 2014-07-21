@@ -55,7 +55,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div id="header">
 <h1 class="title">R Tutorial: Precipitation Graphs, Pt 3</h1>
 <h4 class="author"><em>Nathan Byers</em></h4>
-<h4 class="date"><em>Tuesday, July 24, 2014</em></h4>
+<h4 class="date"><em>Thursday, July 24, 2014</em></h4>
 </div>
 
 
@@ -74,13 +74,13 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
   average
 }</code></pre>
 <p>Now we can use this like any other function in R.</p>
-<pre class="r"><code>myMean(vector = rnorm(10))</code></pre>
-<pre><code>## [1] 0.2434</code></pre>
+<pre class="r"><code>myMean(vector = c(5, 7, 3.14, 12, 9))</code></pre>
+<pre><code>## [1] 7.228</code></pre>
 </div>
 <div id="plot-function" class="section level2">
 <h2>Plot function</h2>
 <p>We’re going to write our own function that will take watershed data and create a precipitation graph. We’ll call our function <code>prPlot()</code> and it’ll have the following general outline:</p>
-<pre class="r"><code>prPlot &lt;- function(date, precip, sample, trellis = FALSE, ...){
+<pre class="r"><code>prPlot &lt;- function(date, precip, sample, trellis = FALSE){
   
   if(trellis == FALSE){
     
@@ -95,9 +95,9 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
   # double y scale plot statements
   
 }</code></pre>
-<p>The three arguments we have so far are the minimum arguments we need to create a graph. We’ll add more as we go along. Right now the requirements for these arguments are that <code>date</code> has the <code>&quot;Date&quot;</code> class and that <code>precip</code> and <code>sample</code> have the <code>&quot;numeric&quot;</code> class; that the three vectors are of the same length (and are ordered appropriately); and that <code>trellis</code> is either <code>TRUE</code> or <code>FALSE</code>.</p>
-<p>Now we’ll simply add code for the plot into braces.</p>
-<pre class="r"><code>prPlot &lt;- function(date, precip, sample, trellis, sample.label, ...){
+<p>The requirements for the arguments are that <code>date</code> has the <code>&quot;Date&quot;</code> class and that <code>precip</code> and <code>sample</code> have the <code>&quot;numeric&quot;</code> class; that the three vectors are of the same length (and are ordered appropriately); and that <code>trellis</code> is either <code>TRUE</code> or <code>FALSE</code>.</p>
+<p>Now we’ll place code for the plot in braces.</p>
+<pre class="r"><code>prPlot &lt;- function(date, precip, sample, trellis, sample.label){
   
   if(trellis == FALSE){
     
@@ -109,14 +109,20 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
     
   } else if(trellis == TRUE){
     
+    # create a time variable with the &quot;POSIXlt&quot;&quot; class
     time &lt;- as.POSIXlt(date)
     
+    # create a character vector with the format &quot;Month, Year&quot; 
+    # with a three-letter abbreviation for the month
     month.year &lt;- format(time, &quot;%b, %Y&quot;)
     
+    # make the character vector a factor with levels in the appropriate order
     month.year &lt;- factor(month.year, levels = unique(month.year))
     
+    # determine the number of rows for the trellis grid
     rows &lt;- length(levels(month.year))/3
     
+    # create a vector with days of the month
     mday &lt;- time$mday
     
     rain &lt;- xyplot(precip ~ mday | month.year, type = &quot;h&quot;,
@@ -136,19 +142,21 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
          par.settings = simpleTheme(col = c(&quot;black&quot;, &quot;red&quot;), pch = c(NA, 16)))
   
 }</code></pre>
-<p>Before we can use this function, we need data in the proper format. So we’ll write a function that subsets the <code>wide.precip.df</code> data frame, properly formats the data, and calls the <code>prPlot</code> function.</p>
+<p>But before we can use this function, we need data in the proper format. So we’ll write a function that subsets data that is in the same format as the <code>wide.precip.df</code> data frame and calls the <code>prPlot</code> function.</p>
 <pre class="r"><code>prSubsetPlot &lt;- function(data, site, site.col, date.col, precip.col, 
                          sample.col, sample.name, conditioned = TRUE,
                          save = TRUE, file.prefix = NULL, 
-                         file.extension = &quot;png&quot;, ...){
+                         file.extension = &quot;png&quot;){
   
+  # subset down to rows with the user selected site
   site.df &lt;- data[data[, site.col] == site, c(date.col, sample.col)]
   
+  # create a data frame with precipitation values for every day, no duplicates
   precip.df &lt;- unique(data[, c(date.col, precip.col)])
   
+  # create a data frame with precipitaiton and sample columns, and a date
+  # column with unique dates
   site.df &lt;- merge(precip.df, site.df, all = TRUE)
-  
-  remove(data, precip.df)
   
   plot &lt;- prPlot(date = site.df[, date.col], precip = site.df[, precip.col],
                      sample = site.df[, sample.col], trellis = conditioned,
@@ -156,16 +164,21 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
   
   if(save){
     
+    # create a file name using site and sample names
     file.name &lt;- paste(site, sample.col, &quot;precip_graph&quot;, sep = &quot;_&quot;)
     
+    # add the extension to the end of the file name
     file.name &lt;- paste(file.name, file.extension, sep = &quot;.&quot;)
     
+    # add the prefix to the beginning
     file.name &lt;- paste0(file.prefix, file.name)
     
+    # open the appropriate graphing device with location for the file
     trellis.device(device = file.extension, filename = file.name)
-    
+     
     print(plot)
     
+    # turn off the graphing device
     dev.off()
     
   } else {
@@ -189,7 +202,7 @@ prSubsetPlot(data = wide.precip.df, site = &quot;LMG-05-0009&quot;, site.col = &
 </div>
 <div id="loops" class="section level2">
 <h2>Loops</h2>
-<p>Like most programming languages, R has while loops and for loops. For loops are the most common loops used in , so we’ll cover how they are written. But in R, it’s even more common to use a special family of loop operations called <code>apply()</code> functions. We’ll end up using one of those to automate our precipitation graphs, but first we’ll go over the for loop.</p>
+<p>Like most programming languages, R has while loops and for loops. For loops are the most commonly used, so we’ll cover how they are written. But in R, it’s even more common to use a special family of loop operations called <code>apply()</code> functions. We’ll end up using one of those to automate our precipitation graphs, but first we’ll go over the for loop.</p>
 </div>
 <div id="for-loop" class="section level2">
 <h2>For loop</h2>
@@ -209,8 +222,8 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.5000  0.1615 -0.2071</code></pre>
-<p>So we created the index variable <code>i</code> with the intial value of <code>1</code>, created the empty vector <code>vector.means</code> to collected the mean values in, and ran the for loop over the sequence <code>1:3</code>. This means that in the first iteration the average of the first vector in the list <code>list.of.vectors</code> is placed as the first value in <code>vector.means</code>, i.e. we have the expression <code>vector.means[1] &lt;- myMean(list.of.vectors[[1]])</code>. And the last line of the loop adds a one to the index variable, so <code>i</code> takes on a value of <code>2</code> for the next iteration, and we have <code>vector.means[2] &lt;- myMean(list.of.vectors[[2]])</code>. This happens a third time, when the index value is <code>3</code>, and the for loop stops after this iteration because <code>i</code> has taken the last value in the sequence.</p>
+<pre><code>## [1] 10.5000  0.2914  0.2945</code></pre>
+<p>So we created the index variable <code>i</code> with the initial value of <code>1</code>, created the empty vector <code>vector.means</code> to collected the mean values in, and ran the for loop over the sequence <code>1:3</code>. This means that in the first iteration the average of the first vector in the list <code>list.of.vectors</code> is placed as the first value in <code>vector.means</code>, i.e. we have the expression <code>vector.means[1] &lt;- myMean(list.of.vectors[[1]])</code>. And the last line of the loop adds a <code>1</code> to the index variable, so <code>i</code> takes on a value of <code>2</code> for the next iteration, and we have <code>vector.means[2] &lt;- myMean(list.of.vectors[[2]])</code>. This happens a third time, when the index value is <code>3</code>, and the for loop stops after this iteration because <code>i</code> has taken the last value in the sequence.</p>
 <p>In R, you can actually simplify the expression a little bit, because you don’t have to manipulate the index variable. This will also work:</p>
 <pre class="r"><code>vector.means &lt;- c()
 for(i in 1:3){
@@ -218,7 +231,7 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.5000  0.1615 -0.2071</code></pre>
+<pre><code>## [1] 10.5000  0.2914  0.2945</code></pre>
 </div>
 <div id="apply-functions" class="section level2">
 <h2>apply functions</h2>
@@ -229,13 +242,13 @@ vector.means</code></pre>
 ## [1] 10.5
 ## 
 ## [[2]]
-## [1] 0.1615
+## [1] 0.2914
 ## 
 ## [[3]]
-## [1] -0.2071</code></pre>
+## [1] 0.2945</code></pre>
 <p><code>lapply()</code> always returns a list of objects. If we wanted the output to be a vector, we could use the <code>sapply()</code> function which simplifies what is returned.</p>
 <pre class="r"><code>sapply(list.of.vectors, myMean)</code></pre>
-<pre><code>## [1] 10.5000  0.1615 -0.2071</code></pre>
+<pre><code>## [1] 10.5000  0.2914  0.2945</code></pre>
 </div>
 <div id="automating-the-graphs" class="section level2">
 <h2>Automating the graphs</h2>
@@ -266,12 +279,12 @@ for(i in 1:dim(scenarios)[1]){
                    file.extension = &quot;png&quot;)
 }</code></pre>
 <p>We could also use an <code>apply</code> function called <code>mapply()</code>.</p>
-<pre class="r"><code>mapply(FUN = prSubsetPlot, site = scenarios[, &quot;station&quot;], 
+<pre class="r"><code>mapply(FUN = prSubsetPlot, site = scenarios[, &quot;station&quot;],  
        sample.col = scenarios[, &quot;substance&quot;], sample.name = substance.names,
        MoreArgs = list(data = wide.precip.df, site.col = &quot;station&quot;, date.col = &quot;date&quot;, 
                        precip.col = &quot;precipitation&quot;, conditioned = &quot;TRUE&quot;, save = TRUE, 
                        file.extension = &quot;png&quot;))</code></pre>
-<p>Finally, to put all of these funtions together and make the automation of precipitaiton graphs as simple as possible, we make one function that will loop through all of the plots and save them to the working directory.</p>
+<p>Finally, to put all of these functions together and make the automation of precipitation graphs as simple as possible, we make one function that will loop through all of the plots and save them to the working directory.</p>
 <pre class="r"><code>precipPlot &lt;- function(data, date.column = &quot;date&quot;, sites, site.column = &quot;station&quot;,
                        substances, substance.names, precip.column = &quot;precipitation&quot;,
                        trellis = &quot;TRUE&quot;, save = TRUE, file.extension = &quot;png&quot;, ...){
@@ -289,6 +302,9 @@ for(i in 1:dim(scenarios)[1]){
 <p>This function has been added to the <code>IDEMdata</code> package. To see the help file, type <code>?precipPlot</code>. Below is how you would use this function to save a plot for every substance and site in the <code>wide.precip.df</code> data frame.</p>
 <pre class="r"><code>stations &lt;- unique(wide.precip.df$station[!is.na(wide.precip.df$station)])
 samples &lt;- colnames(wide.precip.df)[8:34]
+
+# to get the names for the substances, load the deep_river_chemistry
+# data frame and reshape it to get the names in the proper order
 data(deep_river_chemistry)
 library(reshape2)
 wide.df &lt;- dcast(deep_river_chemistry, STATION_NAME + ACTIVITY_NO + ACTIVITY_END_DATE 
