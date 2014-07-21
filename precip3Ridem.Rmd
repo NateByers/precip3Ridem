@@ -186,15 +186,10 @@ of the specified sampled data, and saves it. Let's see if it works. The followin
 code should save a `.png` file in your working directory.
 
 ```{r, eval=FALSE}
-library(lattice)
-library(latticeExtra)
-
 # get the latest version of the 'IDEMdata' package
 library(devtools)
 install_github("InDEM/IDEMdata")
 library(IDEMdata)
-data(wide_precip)
-
 data(wide_precip)
 
 prSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station", 
@@ -360,7 +355,6 @@ type `?precipPlot`. Below is how you would use this function to save a plot for
 every substance at every site in the `wide.precip.df` data frame.
 
 ```{r, eval=FALSE}
-
 stations <- unique(wide.precip.df$station[!is.na(wide.precip.df$station)])
 samples <- colnames(wide.precip.df)[8:34]
 
