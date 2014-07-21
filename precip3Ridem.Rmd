@@ -180,7 +180,7 @@ prSubsetPlot <- function(data, site, site.col, date.col, precip.col,
 
 ```
 
-This function takes a data frame (the argument `data`) that is in the wide format,
+The `prSubsetPlot` function takes a data frame (the argument `data`) that is in the wide format,
 subsets it down to a particular sampling site, creates a precipitation graph
 of the specified sampled data, and saves it. Let's see if it works. The following
 code should save a `.png` file in your working directory.
@@ -189,6 +189,7 @@ code should save a `.png` file in your working directory.
 library(lattice)
 library(latticeExtra)
 
+# get the latest version of the 'IDEMdata' package
 library(devtools)
 install_github("InDEM/IDEMdata")
 library(IDEMdata)
