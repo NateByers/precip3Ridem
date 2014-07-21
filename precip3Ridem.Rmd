@@ -207,8 +207,8 @@ prSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station",
 
 ## Loops
 
-Like most programming languages, R has while loops and for loops. For loops are
-the most commonly used, so we'll cover how they are written. But in R, 
+Like most programming languages, R has while loops and for loops. Of the two, for 
+loops are more commonly used, so we'll cover how they are written. But in R, 
 it's even more common to use a special family of loop operations called `apply()` 
 functions. We'll end up using one of those to automate our precipitation graphs,
 but first we'll go over the for loop.
@@ -267,9 +267,9 @@ vector.means
 
 ## apply functions
 
-Experienced R programmers typically do not use for loops, especially for the 
-example we just looked at. This is an ideal situation for the `lapply()` function.
-`lappy()` is one of a family of functions that are referred to as `apply` functions.
+Experienced R programmers typically do not use for loops, especially in situations
+like the example we just looked at. This is an ideal situation for the `lapply()` function.
+`lappy()` is one member of a family of functions that are referred to as `apply` functions.
 Type `?apply` and `?lapply` to see descriptions of the many related functions.
 
 `lapply()` takes just two arguments (at a minimum), `lapply(X, FUN, ...)`. `X`
@@ -293,7 +293,7 @@ sapply(list.of.vectors, myMean)
 Now, if we want to make a lot of precipitation graphs, we need to set up our code
 so that we can easily loop through all of the arguments necessary for each plot.
 For example, if we wanted to plot 3 different sampling substances at 2 sites, we
-could visualize these scenarios in a data frame.
+could represent these scenarios as rows in a data frame.
 
 ```{r}
 substance <- c("sat", "e_coli", "ph")
@@ -303,7 +303,7 @@ colnames(scenarios) <- c("substance", "station")
 scenarios
 ```
 
-One way to run the `precipSubsetPlot()` function on all of these scenarios is
+One way to run the `prSubsetPlot()` function on all of these scenarios is
 to use a for loop that loops through the index of rows on the data frame. The only
 thing we're missing is the label for the substance on the graph, so first we'll 
 create a vector of substance names.
@@ -357,7 +357,7 @@ precipPlot <- function(data, date.column = "date", sites, site.column = "station
 
 This function has been added to the `IDEMdata` package. To see the help file,
 type `?precipPlot`. Below is how you would use this function to save a plot for
-every substance and site in the `wide.precip.df` data frame.
+every substance at every site in the `wide.precip.df` data frame.
 
 ```{r, eval=FALSE}
 
