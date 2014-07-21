@@ -188,7 +188,11 @@ code should save a `.png` file in your working directory.
 ```{r, eval=FALSE}
 library(lattice)
 library(latticeExtra)
+
+library(devtools)
+install_github("InDEM/IDEMdata")
 library(IDEMdata)
+data(wide_precip)
 
 data(wide_precip)
 
