@@ -49,11 +49,11 @@ myMean(vector = rnorm(10))
 ## Plot function
 
 We're going to write our own function that will take watershed data and create
-a precipitation graph. We'll call our function `precipPlot()` and it'll have
+a precipitation graph. We'll call our function `prPlot()` and it'll have
 the following general outline:
 
 ```{r, eval=FALSE}
-precipPlot <- function(date, precip, sample, trellis = FALSE, ...){
+prPlot <- function(date, precip, sample, trellis = FALSE, ...){
   
   if(trellis == FALSE){
     
@@ -80,7 +80,7 @@ ordered appropriately); and that `trellis` is either `TRUE` or `FALSE`.
 Now we'll simply add code for the plot into braces. 
 
 ```{r}
-precipPlot <- function(date, precip, sample, trellis, sample.label, ...){
+prPlot <- function(date, precip, sample, trellis, sample.label, ...){
   
   if(trellis == FALSE){
     
@@ -124,12 +124,13 @@ precipPlot <- function(date, precip, sample, trellis, sample.label, ...){
 
 Before we can use this function, we need data in the proper format. So we'll write
 a function that subsets the `wide.precip.df` data frame, properly formats the 
-data, and calls the `precipPlot` function.
+data, and calls the `prPlot` function.
 
 ```{r}
-precipSubsetPlot <- function(data, site, site.col, date.col, precip.col, 
-                             sample.col, sample.name, conditioned, save = TRUE,
-                             file.prefix = NULL, file.extension = "png", ...){
+prSubsetPlot <- function(data, site, site.col, date.col, precip.col, 
+                         sample.col, sample.name, conditioned = TRUE,
+                         save = TRUE, file.prefix = NULL, 
+                         file.extension = "png", ...){
   
   site.df <- data[data[, site.col] == site, c(date.col, sample.col)]
   
@@ -139,7 +140,7 @@ precipSubsetPlot <- function(data, site, site.col, date.col, precip.col,
   
   remove(data, precip.df)
   
-  plot <- precipPlot(date = site.df[, date.col], precip = site.df[, precip.col],
+  plot <- prPlot(date = site.df[, date.col], precip = site.df[, precip.col],
                      sample = site.df[, sample.col], trellis = conditioned,
                      sample.label = sample.name)
   
@@ -179,7 +180,7 @@ library(IDEMdata)
 
 data(wide_precip)
 
-precipSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station", 
+prSubsetPlot(data = wide.precip.df, site = "LMG-05-0009", site.col = "station", 
                  date.col = "date", precip.col = "precipitation",  sample.col = "sat", 
                  sample.name = "% Saturation", conditioned = "TRUE", save = TRUE, 
                  file.extension = "png")
@@ -279,7 +280,7 @@ could visualize these scenarios in a data frame.
 
 ```{r}
 substance <- c("sat", "e_coli", "ph")
-station <- c("LMG-05-0009", "LM-05-0004")
+station <- c("LMG-05-0009", "LMG-05-0004")
 scenarios <- expand.grid(substance, station, stringsAsFactors = FALSE)
 colnames(scenarios) <- c("substance", "station")
 scenarios
@@ -297,7 +298,7 @@ substance.names[substance.names == "e_coli"] <- "E. coli (MPN/100mL)"
 substance.names[substance.names == "ph"] <- "pH (SU)"
 
 for(i in 1:dim(scenarios)[1]){
-  precipSubsetPlot(data = wide.precip.df, site = scenarios[i, "station"], 
+  prSubsetPlot(data = wide.precip.df, site = scenarios[i, "station"], 
                    site.col = "station", date.col = "date", 
                    precip.col = "precipitation",  sample.col = scenarios[i, "substance"], 
                    sample.name = substance.names[i], conditioned = "TRUE", save = TRUE, 
@@ -308,12 +309,56 @@ for(i in 1:dim(scenarios)[1]){
 We could also use an `apply` function called `mapply()`.
 
 ```{r, eval=FALSE}
-mapply(FUN = precipSubsetPlot, site = scenarios[, "station"], 
+mapply(FUN = prSubsetPlot, site = scenarios[, "station"], 
        sample.col = scenarios[, "substance"], sample.name = substance.names,
        MoreArgs = list(data = wide.precip.df, site.col = "station", date.col = "date", 
                        precip.col = "precipitation", conditioned = "TRUE", save = TRUE, 
                        file.extension = "png"))
 ```
+
+Finally, to put all of these funtions together and make the automation of 
+precipitaiton graphs as simple as possible, we make one function that will loop
+through all of the plots and save them to the working directory.
+
+```{r, eval=FALSE}
+precipPlot <- function(data, date.column = "date", sites, site.column = "station",
+                       substances, substance.names, precip.column = "precipitation",
+                       trellis = "TRUE", save = TRUE, file.extension = "png", ...){
+  
+  scenarios <- expand.grid(substances, sites, stringsAsFactors = FALSE)
+  colnames(scenarios) <- c("substance", "site")
+  
+  mapply(FUN = prSubsetPlot, site = scenarios[, "site"], 
+         sample.col = scenarios[, "substance"], sample.name = substance.names,
+         MoreArgs = list(data = data, site.col = site.column, date.col = date.column,
+                         precip.col = precip.column, conditioned = trellis,
+                         save = save, file.extension = file.extension))
+
+}
+
+```
+
+This function has been added to the `IDEMdata` package. To see the help file,
+type `?precipPlot`. Below is how you would use this function to save a plot for
+every substance and site in the `wide.precip.df` data frame.
+
+```{r, eval=FALSE}
+
+stations <- unique(wide.precip.df$station[!is.na(wide.precip.df$station)])
+samples <- colnames(wide.precip.df)[8:34]
+data(deep_river_chemistry)
+library(reshape2)
+wide.df <- dcast(deep_river_chemistry, STATION_NAME + ACTIVITY_NO + ACTIVITY_END_DATE 
+                      + WATERBODY_NAME + UTM_EAST + UTM_NORTH + COUNTY_NAME 
+                      ~ SUBSTANCE_NAME, value.var = 'LAB_RESULT')
+names <- colnames(wide.df)[8:34]
+
+precipPlot(data = wide.precip.df, sites = stations, substances = samples,
+           substance.names = names)
+
+```
+
+
 
 ...
 -------------------------------------------------------------------------------
