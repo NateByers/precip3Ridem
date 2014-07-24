@@ -207,12 +207,17 @@ prSubsetPlot(data = wide.precip.df, site = &quot;LMG-05-0009&quot;, site.col = &
 </div>
 <div id="for-loop" class="section level2">
 <h2>For loop</h2>
-<p>In most programming languages, the for loop would be set up in this way:</p>
+<p>In most programming languages, the for loop would typically be set up in this way:</p>
 <pre class="r"><code>i &lt;- 1
 for(i in sequence){
+  
   # operation indexed by i
+  
+  i &lt;- i + 1
+  
 }</code></pre>
-<p>So you first create an index variable, traditionally named <code>i</code>, and give it an initial value of <code>1</code> (or <code>0</code>, or whatever initial value makes sense for the situation). The <code>sequence</code> variable would be a sequence of values that you want the index variable to take while the statements in the brackets are iterated. Lets look at a real example using the <code>myMean()</code> function we created above.</p>
+<p>So you first create an index variable, traditionally named <code>i</code>, and give it an initial value of <code>1</code> (or <code>0</code>, or whatever initial value makes sense for the situation). The <code>sequence</code> variable would be a sequence of values that you want the index variable to take while the statements in the brackets are iterated. In most cases it is a sequence of integers. And at the end you advance the index variable so that it takes the next value in the sequence (in most cases, it is just the next integer, <code>+ 1</code>).</p>
+<p>Lets look at a real example using the <code>myMean()</code> function we created above.</p>
 <pre class="r"><code>list.of.vectors &lt;- list(1:20, rnorm(10), rnorm(30))
 
 i &lt;- 1
@@ -223,7 +228,7 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.5000 -0.3082  0.3264</code></pre>
+<pre><code>## [1] 10.500000 -0.885082 -0.002909</code></pre>
 <p>So we created the index variable <code>i</code> with the initial value of <code>1</code>, created the empty vector <code>vector.means</code> to collected the mean values in, and ran the for loop over the sequence <code>1:3</code>. This means that in the first iteration the average of the first vector in the list <code>list.of.vectors</code> is placed as the first value in <code>vector.means</code>, i.e. we have the expression <code>vector.means[1] &lt;- myMean(list.of.vectors[[1]])</code>. And the last line of the loop adds a <code>1</code> to the index variable, so <code>i</code> takes on a value of <code>2</code> for the next iteration, and we have <code>vector.means[2] &lt;- myMean(list.of.vectors[[2]])</code>. This happens a third time, when the index value is <code>3</code>, and the for loop stops after this iteration because <code>i</code> has taken the last value in the sequence.</p>
 <p>In R, you can actually simplify the expression a little bit, because you don’t have to manipulate the index variable. This will also work:</p>
 <pre class="r"><code>vector.means &lt;- c()
@@ -232,24 +237,24 @@ for(i in 1:3){
 }
 
 vector.means</code></pre>
-<pre><code>## [1] 10.5000 -0.3082  0.3264</code></pre>
+<pre><code>## [1] 10.500000 -0.885082 -0.002909</code></pre>
 </div>
 <div id="apply-functions" class="section level2">
 <h2>apply functions</h2>
-<p>Experienced R programmers typically do not use for loops, especially in situations like the example we just looked at. This is an ideal situation for the <code>lapply()</code> function. <code>lappy()</code> is one member of a family of functions that are referred to as <code>apply</code> functions. Type <code>?apply</code> and <code>?lapply</code> to see descriptions of the many related functions.</p>
+<p>Experienced R programmers typically do not use for loops, especially in situations like the example we just looked at. This is an ideal situation for the <code>lapply()</code> function. <code>lappy()</code> is one member of a family of functions that are referred to as <code>apply</code> functions. Type <code>?apply</code> and <code>?lapply</code> to see descriptions of the many related functions, and visit <a href="http://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/" target="_blank">this page</a> for some examples of how these functions can be used.</p>
 <p><code>lapply()</code> takes just two arguments (at a minimum), <code>lapply(X, FUN, ...)</code>. <code>X</code> is a list of objects that you want to perform an operation on, and <code>FUN</code> is the function that you want to apply to each object. In our situation, we want to apply <code>myMean()</code> to <code>list.of.vectors</code>.</p>
 <pre class="r"><code>lapply(list.of.vectors, myMean)</code></pre>
 <pre><code>## [[1]]
 ## [1] 10.5
 ## 
 ## [[2]]
-## [1] -0.3082
+## [1] -0.8851
 ## 
 ## [[3]]
-## [1] 0.3264</code></pre>
+## [1] -0.002909</code></pre>
 <p><code>lapply()</code> always returns a list of objects. If we wanted the output to be a vector, we could use the <code>sapply()</code> function which simplifies what is returned.</p>
 <pre class="r"><code>sapply(list.of.vectors, myMean)</code></pre>
-<pre><code>## [1] 10.5000 -0.3082  0.3264</code></pre>
+<pre><code>## [1] 10.500000 -0.885082 -0.002909</code></pre>
 </div>
 <div id="automating-the-graphs" class="section level2">
 <h2>Automating the graphs</h2>

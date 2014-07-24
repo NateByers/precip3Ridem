@@ -211,20 +211,28 @@ but first we'll go over the for loop.
 
 ## For loop
 
-In most programming languages, the for loop would be set up in this way:
+In most programming languages, the for loop would typically be set up in this way:
 
 ```{r, eval=FALSE}
 i <- 1
 for(i in sequence){
+  
   # operation indexed by i
+  
+  i <- i + 1
+  
 }
 ```
 
 So you first create an index variable, traditionally named `i`, and give it an 
 initial value of `1` (or `0`, or whatever initial value makes sense for the situation).
 The `sequence` variable would be a sequence of values that you want the index 
-variable to take while the statements in the brackets are iterated. Lets look at
-a real example using the `myMean()` function we created above.
+variable to take while the statements in the brackets are iterated. In most cases
+it is a sequence of integers. And at the end you advance the index variable so
+that it takes the next value in the sequence (in most cases, it is just the next
+integer, `+ 1`).
+
+Lets look at a real example using the `myMean()` function we created above.
 
 ```{r}
 list.of.vectors <- list(1:20, rnorm(10), rnorm(30))
@@ -266,7 +274,9 @@ vector.means
 Experienced R programmers typically do not use for loops, especially in situations
 like the example we just looked at. This is an ideal situation for the `lapply()` function.
 `lappy()` is one member of a family of functions that are referred to as `apply` functions.
-Type `?apply` and `?lapply` to see descriptions of the many related functions.
+Type `?apply` and `?lapply` to see descriptions of the many related functions, 
+and visit <a href="http://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/"
+target="_blank">this page</a> for some examples of how these functions can be used.
 
 `lapply()` takes just two arguments (at a minimum), `lapply(X, FUN, ...)`. `X`
 is a list of objects that you want to perform an operation on, and `FUN` is the 
