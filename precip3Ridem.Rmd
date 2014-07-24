@@ -28,8 +28,9 @@ myFunction <- function(){
 So functions are created just like other variables in R, with the assignment
 operator `<-`. Arguments for the function are placed inside the brackets `()` 
 and the statements for the function are placed inside the braces `{}`. The last line
-of the statements will be returned when the function is used. For example, here 
-is a function that calculates the mean of a vector.
+of the statements will be returned when the function is used. 
+
+For example, here is a function that calculates the mean of a vector.
 
 ```{r}
 myMean <- function(vector){
@@ -53,7 +54,7 @@ a precipitation graph. We'll call our function `prPlot()` and it'll have
 the following general outline:
 
 ```{r, eval=FALSE}
-prPlot <- function(date, precip, sample, trellis = FALSE){
+prPlot <- function(date, precip, sample, trellis = TRUE, sample.label){
   
   if(trellis == FALSE){
     
@@ -73,13 +74,13 @@ prPlot <- function(date, precip, sample, trellis = FALSE){
 
 The requirements for the arguments are that `date` has the `"Date"` class and 
 that `precip` and `sample` have the `"numeric"` class; that the three vectors 
-are of the same length (and are ordered appropriately); and that `trellis` is 
-either `TRUE` or `FALSE`.
+are of the same length (and are ordered appropriately); that `trellis` is 
+either `TRUE` or `FALSE`; and that `sample.label` is a string.
 
 Now we'll place code for the plot in braces. 
 
 ```{r, eval=FALSE}
-prPlot <- function(date, precip, sample, trellis, sample.label){
+prPlot <- function(date, precip, sample, trellis = TRUE, sample.label){
   
   if(trellis == FALSE){
     
