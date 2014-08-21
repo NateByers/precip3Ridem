@@ -214,60 +214,46 @@ but first we'll go over the for loop.
 In most programming languages, the for loop would typically be set up in this way:
 
 ```{r, eval=FALSE}
-i <- 1
+
 for(i in sequence){
   
   # operation indexed by i
   
-  i <- i + 1
-  
 }
 ```
 
-So you first create an index variable, traditionally named `i`, and give it an 
+The index variable, traditionally named `i`, is given an 
 initial value of `1` (or `0`, or whatever initial value makes sense for the situation).
 The `sequence` variable would be a sequence of values that you want the index 
 variable to take while the statements in the brackets are iterated. In most cases
-it is a sequence of integers. And at the end you advance the index variable so
-that it takes the next value in the sequence (in most cases, it is just the next
-integer, `+ 1`).
+it is a sequence of integers. And at the end of a single iteration of the loop, 
+the index variable is advanced to the next value in the sequence (in most cases, 
+it is just the next integer, `i + 1`).
 
 Lets look at a real example using the `myMean()` function we created above.
 
 ```{r}
 list.of.vectors <- list(1:20, rnorm(10), rnorm(30))
 
-i <- 1
 vector.means <- c()
+
 for(i in 1:3){
   vector.means[i] <- myMean(list.of.vectors[[i]])
-  i <- i + 1
 }
 
 vector.means
 ```
 
-So we created the index variable `i` with the initial value of `1`, created the
-empty vector `vector.means` to collected the mean values in, and ran the for loop
+So we create the empty vector `vector.means` to collect the mean values in,
+and the index variable `i` takes an initial value of `1`. Then the for loop runs
 over the sequence `1:3`. This means that in the first iteration the average of
 the first vector in the list `list.of.vectors` is placed as the first value in
 `vector.means`, i.e. we have the expression `vector.means[1] <- myMean(list.of.vectors[[1]])`.
-And the last line of the loop adds a `1` to the index variable, so `i` takes on 
+After the first loop is completed the index variable advances one step, so `i` takes on 
 a value of `2` for the next iteration, and we have `vector.means[2] <- myMean(list.of.vectors[[2]])`.
 This happens a third time, when the index value is `3`, and the for loop stops
 after this iteration because `i` has taken the last value in the sequence.
 
-In R, you can actually simplify the expression a little bit, because you don't 
-have to manipulate the index variable. This will also work:
-
-```{r}
-vector.means <- c()
-for(i in 1:3){
-  vector.means[i] <- myMean(list.of.vectors[[i]])
-}
-
-vector.means
-```
 
 ## apply functions
 
