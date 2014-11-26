@@ -334,11 +334,17 @@ precipPlot <- function(data, date.column = "date", sites, site.column = "station
                        substances, substance.names, precip.column = "precipitation",
                        trellis = "TRUE", save = TRUE, file.extension = "png", ...){
   
+  substance.names.df <- data.frame(substance = substances, 
+                                   substance.name = substance.names,
+                                   stringsAsFactors = FALSE)
+  
   scenarios <- expand.grid(substances, sites, stringsAsFactors = FALSE)
   colnames(scenarios) <- c("substance", "site")
+  scenarios <- merge(scenarios, substance.names.df)
   
   mapply(FUN = prSubsetPlot, site = scenarios[, "site"], 
-         sample.col = scenarios[, "substance"], sample.name = substance.names,
+         sample.col = scenarios[, "substance"], 
+         sample.name = scenarios[, "substance.name"],
          MoreArgs = list(data = data, site.col = site.column, date.col = date.column,
                          precip.col = precip.column, conditioned = trellis,
                          save = save, file.extension = file.extension))
